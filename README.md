@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Deadlock Database
 
-## Getting Started
+A small reference explorer for [Deadlock](https://playdeadlock.com/) heroes and shop items. Weekly assignment project — scope is intentionally limited to Heroes, Items, Abilities, and Upgrades. No players, matches, leaderboards, or stats.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Next.js (App Router) + TypeScript
+- Tailwind CSS + shadcn/ui
+- Supabase (Postgres)
+- Data sourced from the [Deadlock Assets API](https://api.deadlock-api.com)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `app/` — pages (`/`, `/heroes`, `/items`)
+- `components/` — UI components, `components/ui/` is shadcn-generated
+- `lib/` — Supabase client and data-fetching functions
+- `supabase/migrations/` — SQL schema and permission migrations, applied in order
+- `scripts/seed.ts` — one-off script that pulls real hero/item data from the Deadlock Assets API and upserts it into Supabase
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup
 
-## Learn More
+1. Install dependencies:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   npm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Create a Supabase project, then in its SQL Editor run each file in `supabase/migrations/` **in order**.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Create `.env.local` in the project root with:
 
-## Deploy on Vercel
+   ```
+   SUPABASE_URL=
+   SUPABASE_SERVICE_ROLE_KEY=
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   NEXT_PUBLIC_SUPABASE_URL=
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` — used only by `scripts/seed.ts` (server-side, never exposed to the browser). From Supabase dashboard → Project Settings → API → Project URL / `service_role` key.
+   - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — used by the app to read data. Same Project URL, plus the `anon` `public` key from the same page.
+
+4. Seed the database with real Deadlock data:
+
+   ```bash
+   npm run seed
+   ```
+
+5. Run the dev server:
+
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000).
